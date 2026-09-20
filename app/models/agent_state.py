@@ -16,6 +16,8 @@ class AgentState(TypedDict):
 
     context: list[str]
 
+    retrieval_scores: list[float]
+
     evidence_sufficient: bool
 
     evidence_score: float

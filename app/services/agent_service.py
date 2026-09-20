@@ -48,8 +48,14 @@ def technical_path(state: AgentState):
         for result in results
     ]
 
+    retrieval_scores = [
+        result.score
+        for result in results
+    ]
+
     return {
         "context": context,
+        "retrieval_scores": retrieval_scores,
         "path": "technical",
     }
 
@@ -66,8 +72,14 @@ def general_path(state: AgentState):
         for result in results
     ]
 
+    retrieval_scores = [
+        result.score
+        for result in results
+    ]
+
     return {
         "context": context,
+        "retrieval_scores": retrieval_scores,
         "path": "general",
     }
 
@@ -75,7 +87,8 @@ def general_path(state: AgentState):
 def evaluate_evidence(state: AgentState):
 
     evaluation = evidence_evaluator.evaluate(
-        state["context"]
+        state["context"],
+        state["retrieval_scores"],
     )
 
     return {
@@ -241,6 +254,7 @@ class AgentService:
             "matched_keywords": [],
             "path": "",
             "context": [],
+            "retrieval_scores": [],
             "evidence_sufficient": False,
             "evidence_score": 0.0,
             "evidence_reason": "",
