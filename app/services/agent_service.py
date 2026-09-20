@@ -37,7 +37,23 @@ def route_question(state: AgentState):
     }
 
 
-def retrieve_context(state: AgentState):
+def technical_path(state: AgentState):
+
+    results = retrieval_service.retrieve(
+        state["question"]
+    )
+
+    context = [
+        result.payload["text"]
+        for result in results
+    ]
+
+    return {
+        "context": context
+    }
+
+
+def general_path(state: AgentState):
 
     results = retrieval_service.retrieve(
         state["question"]
@@ -66,6 +82,9 @@ You are an AI Engineering Copilot.
 
 Answer the user's question using only the provided context.
 
+Route:
+{state["route"]}
+
 Context:
 {context}
 
@@ -85,6 +104,14 @@ Answer clearly and concisely.
     }
 
 
+def select_path(state: AgentState):
+
+    if state["route"] == "technical":
+        return "technical"
+
+    return "general"
+
+
 class AgentService:
 
     def __init__(self):
@@ -97,8 +124,13 @@ class AgentService:
         )
 
         graph.add_node(
-            "retrieve_context",
-            retrieve_context,
+            "technical_path",
+            technical_path,
+        )
+
+        graph.add_node(
+            "general_path",
+            general_path,
         )
 
         graph.add_node(
@@ -110,13 +142,22 @@ class AgentService:
             "route_question"
         )
 
-        graph.add_edge(
+        graph.add_conditional_edges(
             "route_question",
-            "retrieve_context",
+            select_path,
+            {
+                "technical": "technical_path",
+                "general": "general_path",
+            },
         )
 
         graph.add_edge(
-            "retrieve_context",
+            "technical_path",
+            "generate_answer",
+        )
+
+        graph.add_edge(
+            "general_path",
             "generate_answer",
         )
 
