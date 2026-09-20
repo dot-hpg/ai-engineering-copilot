@@ -18,6 +18,8 @@ class AgentState(TypedDict):
 
     evidence_sufficient: bool
 
+    evidence_score: float
+
     evidence_reason: str
 
     answer: str

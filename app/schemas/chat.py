@@ -17,6 +17,7 @@ class ChatResponse(BaseModel):
     path: str
 
     evidence_sufficient: bool
+    evidence_score: float
     evidence_reason: str
 
     execution_time_ms: float

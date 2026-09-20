@@ -25,6 +25,7 @@ def chat(request: ChatRequest):
         route=result["route"],
         path=result["path"],
         evidence_sufficient=result["evidence_sufficient"],
+        evidence_score=result["evidence_score"],
         evidence_reason=result["evidence_reason"],
         execution_time_ms=result["execution_time_ms"],
     )

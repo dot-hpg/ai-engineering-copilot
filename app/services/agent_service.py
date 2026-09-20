@@ -80,6 +80,7 @@ def evaluate_evidence(state: AgentState):
 
     return {
         "evidence_sufficient": evaluation["is_sufficient"],
+        "evidence_score": evaluation["score"],
         "evidence_reason": evaluation["reason"],
         "answer": (
             ""
@@ -124,6 +125,9 @@ Execution Path:
 
 Evidence Status:
 {state["evidence_sufficient"]}
+
+Evidence Score:
+{state["evidence_score"]}
 
 Evidence Reason:
 {state["evidence_reason"]}
@@ -238,6 +242,7 @@ class AgentService:
             "path": "",
             "context": [],
             "evidence_sufficient": False,
+            "evidence_score": 0.0,
             "evidence_reason": "",
             "answer": "",
             "execution_time_ms": 0.0,
