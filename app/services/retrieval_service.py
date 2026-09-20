@@ -4,8 +4,6 @@ from app.services.vector_service import VectorService
 
 class RetrievalService:
 
-    RELEVANCE_THRESHOLD = 0.70
-
     def __init__(self, vector_service: VectorService):
         self.embedding_service = EmbeddingService()
         self.vector_service = vector_service
@@ -26,10 +24,4 @@ class RetrievalService:
             limit=limit,
         )
 
-        relevant_results = [
-            result
-            for result in results
-            if result.score >= self.RELEVANCE_THRESHOLD
-        ]
-
-        return relevant_results
+        return results
