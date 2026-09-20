@@ -24,7 +24,10 @@ def route_question(state: AgentState):
     )
 
     return {
-        "route": classification["route"]
+        "route": classification["route"],
+        "classification_reason": classification["reason"],
+        "classification_confidence": classification["confidence"],
+        "matched_keywords": classification["matched_keywords"],
     }
 
 
@@ -79,6 +82,12 @@ Answer the user's question using only the provided context.
 
 Route:
 {state["route"]}
+
+Classification Reason:
+{state["classification_reason"]}
+
+Classification Confidence:
+{state["classification_confidence"]}
 
 Execution Path:
 {state["path"]}
@@ -171,6 +180,9 @@ class AgentService:
         initial_state: AgentState = {
             "question": question,
             "route": "",
+            "classification_reason": "",
+            "classification_confidence": 0.0,
+            "matched_keywords": [],
             "path": "",
             "context": [],
             "answer": "",
