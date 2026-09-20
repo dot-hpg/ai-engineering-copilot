@@ -1,3 +1,5 @@
+import time
+
 from langgraph.graph import END, StateGraph
 
 from app.models.agent_state import AgentState
@@ -177,6 +179,8 @@ class AgentService:
 
     def run(self, question: str):
 
+        start_time = time.perf_counter()
+
         initial_state: AgentState = {
             "question": question,
             "route": "",
@@ -186,8 +190,19 @@ class AgentService:
             "path": "",
             "context": [],
             "answer": "",
+            "execution_time_ms": 0.0,
         }
 
-        return self.graph.invoke(
+        result = self.graph.invoke(
             initial_state
         )
+
+        execution_time_ms = (
+            time.perf_counter() - start_time
+        ) * 1000
+
+        result["execution_time_ms"] = (
+            round(execution_time_ms, 2)
+        )
+
+        return result

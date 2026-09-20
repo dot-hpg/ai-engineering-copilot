@@ -17,3 +17,5 @@ class AgentState(TypedDict):
     context: list[str]
 
     answer: str
+
+    execution_time_ms: float
