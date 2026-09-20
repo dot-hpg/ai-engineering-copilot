@@ -1,7 +1,6 @@
 from langgraph.graph import END, StateGraph
 
 from app.models.agent_state import AgentState
-from app.services.llm_service import LLMService
 from app.services.retrieval_service import RetrievalService
 from app.services.vector_service import VectorService
 
@@ -49,7 +48,8 @@ def technical_path(state: AgentState):
     ]
 
     return {
-        "context": context
+        "context": context,
+        "path": "technical",
     }
 
 
@@ -65,39 +65,25 @@ def general_path(state: AgentState):
     ]
 
     return {
-        "context": context
+        "context": context,
+        "path": "general",
     }
 
 
 def generate_answer(state: AgentState):
 
-    llm_service = LLMService()
-
-    context = "\n\n".join(
-        state["context"]
-    )
-
-    prompt = f"""
-You are an AI Engineering Copilot.
-
-Answer the user's question using only the provided context.
-
-Route:
-{state["route"]}
-
-Context:
-{context}
-
-Question:
-{state["question"]}
-
-If the context does not contain enough information,
-say that the available context is insufficient.
-
-Answer clearly and concisely.
-"""
-
-    answer = llm_service.generate(prompt)
+    if state["context"]:
+        answer = (
+            "Test generation successful. "
+            f"Retrieved {len(state['context'])} relevant "
+            "document(s) through the "
+            f"{state['path']} path."
+        )
+    else:
+        answer = (
+            "Test generation successful, "
+            "but no relevant context was retrieved."
+        )
 
     return {
         "answer": answer
@@ -173,6 +159,7 @@ class AgentService:
         initial_state: AgentState = {
             "question": question,
             "route": "",
+            "path": "",
             "context": [],
             "answer": "",
         }
