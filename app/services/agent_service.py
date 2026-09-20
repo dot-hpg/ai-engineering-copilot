@@ -31,7 +31,8 @@ def route_question(state: AgentState):
 def technical_path(state: AgentState):
 
     results = retrieval_service.retrieve(
-        state["question"]
+        state["question"],
+        route="technical",
     )
 
     context = [
@@ -48,7 +49,8 @@ def technical_path(state: AgentState):
 def general_path(state: AgentState):
 
     results = retrieval_service.retrieve(
-        state["question"]
+        state["question"],
+        route="general",
     )
 
     context = [
