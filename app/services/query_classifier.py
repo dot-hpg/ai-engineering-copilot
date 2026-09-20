@@ -21,14 +21,27 @@ class QueryClassifier:
         "debugging",
     ]
 
-    def classify(self, question: str) -> str:
+    def classify(self, question: str) -> dict:
 
         question = question.lower()
 
-        if any(
-            keyword in question
+        matched_keywords = [
+            keyword
             for keyword in self.TECHNICAL_KEYWORDS
-        ):
-            return "technical"
+            if keyword in question
+        ]
 
-        return "general"
+        if matched_keywords:
+            return {
+                "route": "technical",
+                "reason": "engineering_keyword",
+                "confidence": 0.95,
+                "matched_keywords": matched_keywords,
+            }
+
+        return {
+            "route": "general",
+            "reason": "no_engineering_keyword",
+            "confidence": 0.70,
+            "matched_keywords": [],
+        }

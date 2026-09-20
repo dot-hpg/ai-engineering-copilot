@@ -19,12 +19,12 @@ def route_question(state: AgentState):
 
     classifier = QueryClassifier()
 
-    route = classifier.classify(
+    classification = classifier.classify(
         state["question"]
     )
 
     return {
-        "route": route
+        "route": classification["route"]
     }
 
 
