@@ -7,7 +7,10 @@ class VectorService:
     COLLECTION_NAME = "engineering_docs"
 
     def __init__(self):
-        self.client = QdrantClient(path="./qdrant_data")
+        self.client = QdrantClient(
+            host="localhost",
+            port=6333,
+        )
 
     def create_collection(self):
         if not self.client.collection_exists(self.COLLECTION_NAME):
@@ -31,7 +34,9 @@ class VectorService:
                 PointStruct(
                     id=document_id,
                     vector=vector,
-                    payload={"text": text},
+                    payload={
+                        "text": text,
+                    },
                 )
             ],
         )
