@@ -201,8 +201,9 @@ class AgentService:
             time.perf_counter() - start_time
         ) * 1000
 
-        result["execution_time_ms"] = (
-            round(execution_time_ms, 2)
+        result["execution_time_ms"] = round(
+            execution_time_ms,
+            2,
         )
 
         return result
