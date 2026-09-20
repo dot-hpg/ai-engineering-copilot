@@ -15,7 +15,7 @@ class AIService:
             self.vector_service
         )
 
-    def generate_response(self, question: str) -> str:
+    def generate_response(self, question: str):
         results = self.retrieval.retrieve(question)
 
         context = "\n\n".join(
@@ -38,4 +38,11 @@ If the context does not contain enough information,
 say that clearly instead of inventing an answer.
 """
 
-        return self.llm.generate(prompt)
+        answer = self.llm.generate(prompt)
+
+        sources = [
+            result.payload["text"]
+            for result in results
+        ]
+
+        return answer, sources
