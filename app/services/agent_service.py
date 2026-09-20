@@ -1,0 +1,141 @@
+from langgraph.graph import END, StateGraph
+
+from app.models.agent_state import AgentState
+from app.services.llm_service import LLMService
+from app.services.retrieval_service import RetrievalService
+from app.services.vector_service import VectorService
+
+
+vector_service = VectorService()
+vector_service.create_collection()
+
+retrieval_service = RetrievalService(
+    vector_service
+)
+
+
+def route_question(state: AgentState):
+
+    question = state["question"].lower()
+
+    if any(
+        keyword in question
+        for keyword in [
+            "code",
+            "python",
+            "bug",
+            "error",
+            "exception",
+        ]
+    ):
+        route = "technical"
+    else:
+        route = "general"
+
+    return {
+        "route": route
+    }
+
+
+def retrieve_context(state: AgentState):
+
+    results = retrieval_service.retrieve(
+        state["question"]
+    )
+
+    context = [
+        result.payload["text"]
+        for result in results
+    ]
+
+    return {
+        "context": context
+    }
+
+
+def generate_answer(state: AgentState):
+
+    llm_service = LLMService()
+
+    context = "\n\n".join(
+        state["context"]
+    )
+
+    prompt = f"""
+You are an AI Engineering Copilot.
+
+Answer the user's question using only the provided context.
+
+Context:
+{context}
+
+Question:
+{state["question"]}
+
+If the context does not contain enough information,
+say that the available context is insufficient.
+
+Answer clearly and concisely.
+"""
+
+    answer = llm_service.generate(prompt)
+
+    return {
+        "answer": answer
+    }
+
+
+class AgentService:
+
+    def __init__(self):
+
+        graph = StateGraph(AgentState)
+
+        graph.add_node(
+            "route_question",
+            route_question,
+        )
+
+        graph.add_node(
+            "retrieve_context",
+            retrieve_context,
+        )
+
+        graph.add_node(
+            "generate_answer",
+            generate_answer,
+        )
+
+        graph.set_entry_point(
+            "route_question"
+        )
+
+        graph.add_edge(
+            "route_question",
+            "retrieve_context",
+        )
+
+        graph.add_edge(
+            "retrieve_context",
+            "generate_answer",
+        )
+
+        graph.add_edge(
+            "generate_answer",
+            END,
+        )
+
+        self.graph = graph.compile()
+
+    def run(self, question: str):
+
+        initial_state: AgentState = {
+            "question": question,
+            "route": "",
+            "context": [],
+            "answer": "",
+        }
+
+        return self.graph.invoke(
+            initial_state
+        )
