@@ -2,6 +2,7 @@ from langgraph.graph import END, StateGraph
 
 from app.models.agent_state import AgentState
 from app.services.llm_service import LLMService
+from app.services.query_classifier import QueryClassifier
 from app.services.retrieval_service import RetrievalService
 from app.services.vector_service import VectorService
 
@@ -16,21 +17,11 @@ retrieval_service = RetrievalService(
 
 def route_question(state: AgentState):
 
-    question = state["question"].lower()
+    classifier = QueryClassifier()
 
-    if any(
-        keyword in question
-        for keyword in [
-            "code",
-            "python",
-            "bug",
-            "error",
-            "exception",
-        ]
-    ):
-        route = "technical"
-    else:
-        route = "general"
+    route = classifier.classify(
+        state["question"]
+    )
 
     return {
         "route": route
@@ -186,4 +177,3 @@ class AgentService:
         return self.graph.invoke(
             initial_state
         )
-        
