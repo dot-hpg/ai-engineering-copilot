@@ -7,7 +7,7 @@ class VectorService:
     COLLECTION_NAME = "engineering_docs"
 
     def __init__(self):
-        self.client = QdrantClient(":memory:")
+        self.client = QdrantClient(path="./qdrant_data")
 
     def create_collection(self):
         if not self.client.collection_exists(self.COLLECTION_NAME):
