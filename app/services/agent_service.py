@@ -3,6 +3,7 @@ import time
 from langgraph.graph import END, StateGraph
 
 from app.models.agent_state import AgentState
+from app.services.evidence_evaluator import EvidenceEvaluator
 from app.services.llm_service import LLMService
 from app.services.query_classifier import QueryClassifier
 from app.services.retrieval_service import RetrievalService
@@ -15,6 +16,8 @@ vector_service.create_collection()
 retrieval_service = RetrievalService(
     vector_service
 )
+
+evidence_evaluator = EvidenceEvaluator()
 
 
 def route_question(state: AgentState):
@@ -69,6 +72,31 @@ def general_path(state: AgentState):
     }
 
 
+def evaluate_evidence(state: AgentState):
+
+    evaluation = evidence_evaluator.evaluate(
+        state["context"]
+    )
+
+    return {
+        "evidence_sufficient": evaluation["is_sufficient"],
+        "evidence_reason": evaluation["reason"],
+        "answer": (
+            ""
+            if evaluation["is_sufficient"]
+            else evaluation["reason"]
+        ),
+    }
+
+
+def select_evidence_path(state: AgentState):
+
+    if state["evidence_sufficient"]:
+        return "generate"
+
+    return "stop"
+
+
 def generate_answer(state: AgentState):
 
     llm_service = LLMService()
@@ -93,6 +121,12 @@ Classification Confidence:
 
 Execution Path:
 {state["path"]}
+
+Evidence Status:
+{state["evidence_sufficient"]}
+
+Evidence Reason:
+{state["evidence_reason"]}
 
 Context:
 {context}
@@ -143,6 +177,11 @@ class AgentService:
         )
 
         graph.add_node(
+            "evaluate_evidence",
+            evaluate_evidence,
+        )
+
+        graph.add_node(
             "generate_answer",
             generate_answer,
         )
@@ -162,12 +201,21 @@ class AgentService:
 
         graph.add_edge(
             "technical_path",
-            "generate_answer",
+            "evaluate_evidence",
         )
 
         graph.add_edge(
             "general_path",
-            "generate_answer",
+            "evaluate_evidence",
+        )
+
+        graph.add_conditional_edges(
+            "evaluate_evidence",
+            select_evidence_path,
+            {
+                "generate": "generate_answer",
+                "stop": END,
+            },
         )
 
         graph.add_edge(
@@ -189,6 +237,8 @@ class AgentService:
             "matched_keywords": [],
             "path": "",
             "context": [],
+            "evidence_sufficient": False,
+            "evidence_reason": "",
             "answer": "",
             "execution_time_ms": 0.0,
         }

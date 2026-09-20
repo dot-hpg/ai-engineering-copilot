@@ -16,6 +16,10 @@ class AgentState(TypedDict):
 
     context: list[str]
 
+    evidence_sufficient: bool
+
+    evidence_reason: str
+
     answer: str
 
     execution_time_ms: float

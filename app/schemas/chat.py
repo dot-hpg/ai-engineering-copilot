@@ -1,28 +1,22 @@
-from fastapi import APIRouter
-
-from app.schemas.chat import ChatRequest, ChatResponse
-from app.services.ai_service import AIService
+from pydantic import BaseModel, Field
 
 
-router = APIRouter(
-    prefix="/api/v1",
-    tags=["Chat"],
-)
-
-ai_service = AIService()
-
-
-@router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
-
-    result = ai_service.generate_response(
-        request.question
+class ChatRequest(BaseModel):
+    question: str = Field(
+        ...,
+        min_length=1,
+        description="Engineering question from the user",
     )
 
-    return ChatResponse(
-        answer=result["answer"],
-        sources=result["context"],
-        route=result["route"],
-        path=result["path"],
-        execution_time_ms=result["execution_time_ms"],
-    )
+
+class ChatResponse(BaseModel):
+    answer: str
+    sources: list[str] = []
+
+    route: str
+    path: str
+
+    evidence_sufficient: bool
+    evidence_reason: str
+
+    execution_time_ms: float

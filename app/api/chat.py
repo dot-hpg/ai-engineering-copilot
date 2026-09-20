@@ -14,11 +14,17 @@ ai_service = AIService()
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    answer, sources = ai_service.generate_response(
+
+    result = ai_service.generate_response(
         request.question
     )
 
     return ChatResponse(
-        answer=answer,
-        sources=sources,
+        answer=result["answer"],
+        sources=result["context"],
+        route=result["route"],
+        path=result["path"],
+        evidence_sufficient=result["evidence_sufficient"],
+        evidence_reason=result["evidence_reason"],
+        execution_time_ms=result["execution_time_ms"],
     )
