@@ -23,5 +23,6 @@ class ChatResponse(BaseModel):
     answer_supported: bool
     answer_score: float
     answer_evaluation_reason: str
+    answer_attempts: int
 
     execution_time_ms: float

@@ -30,5 +30,6 @@ def chat(request: ChatRequest):
         answer_supported=result["answer_supported"],
         answer_score=result["answer_score"],
         answer_evaluation_reason=result["answer_evaluation_reason"],
+        answer_attempts=result["answer_attempts"],
         execution_time_ms=result["execution_time_ms"],
     )
