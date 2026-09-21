@@ -20,4 +20,8 @@ class ChatResponse(BaseModel):
     evidence_score: float
     evidence_reason: str
 
+    answer_supported: bool
+    answer_score: float
+    answer_evaluation_reason: str
+
     execution_time_ms: float

@@ -20,5 +20,8 @@ class AIService:
             "evidence_sufficient": result["evidence_sufficient"],
             "evidence_score": result["evidence_score"],
             "evidence_reason": result["evidence_reason"],
+            "answer_supported": result["answer_supported"],
+            "answer_score": result["answer_score"],
+            "answer_evaluation_reason": result["answer_evaluation_reason"],
             "execution_time_ms": result["execution_time_ms"],
         }

@@ -26,4 +26,10 @@ class AgentState(TypedDict):
 
     answer: str
 
+    answer_supported: bool
+
+    answer_score: float
+
+    answer_evaluation_reason: str
+
     execution_time_ms: float

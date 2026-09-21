@@ -3,6 +3,7 @@ import time
 from langgraph.graph import END, StateGraph
 
 from app.models.agent_state import AgentState
+from app.services.answer_evaluator import AnswerEvaluator
 from app.services.evidence_evaluator import EvidenceEvaluator
 from app.services.llm_service import LLMService
 from app.services.query_classifier import QueryClassifier
@@ -18,6 +19,7 @@ retrieval_service = RetrievalService(
 )
 
 evidence_evaluator = EvidenceEvaluator()
+answer_evaluator = AnswerEvaluator()
 
 
 def route_question(state: AgentState):
@@ -164,6 +166,28 @@ Answer clearly and concisely.
     }
 
 
+def evaluate_answer(state: AgentState):
+
+    evaluation = answer_evaluator.evaluate(
+        state["answer"],
+        state["context"],
+    )
+
+    return {
+        "answer_supported": evaluation["is_supported"],
+        "answer_score": evaluation["score"],
+        "answer_evaluation_reason": evaluation["reason"],
+    }
+
+
+def select_answer_path(state: AgentState):
+
+    if state["answer_supported"]:
+        return "finish"
+
+    return "reject"
+
+
 def select_path(state: AgentState):
 
     if state["route"] == "technical":
@@ -203,6 +227,11 @@ class AgentService:
             generate_answer,
         )
 
+        graph.add_node(
+            "evaluate_answer",
+            evaluate_answer,
+        )
+
         graph.set_entry_point(
             "route_question"
         )
@@ -237,7 +266,16 @@ class AgentService:
 
         graph.add_edge(
             "generate_answer",
-            END,
+            "evaluate_answer",
+        )
+
+        graph.add_conditional_edges(
+            "evaluate_answer",
+            select_answer_path,
+            {
+                "finish": END,
+                "reject": END,
+            },
         )
 
         self.graph = graph.compile()
@@ -259,6 +297,9 @@ class AgentService:
             "evidence_score": 0.0,
             "evidence_reason": "",
             "answer": "",
+            "answer_supported": False,
+            "answer_score": 0.0,
+            "answer_evaluation_reason": "",
             "execution_time_ms": 0.0,
         }
 
