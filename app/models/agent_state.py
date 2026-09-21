@@ -32,4 +32,8 @@ class AgentState(TypedDict):
 
     answer_evaluation_reason: str
 
+    answer_attempts: int
+
+    max_answer_attempts: int
+
     execution_time_ms: float

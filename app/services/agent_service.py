@@ -115,6 +115,10 @@ def select_evidence_path(state: AgentState):
 
 def generate_answer(state: AgentState):
 
+    answer_attempts = (
+        state["answer_attempts"] + 1
+    )
+
     llm_service = LLMService()
 
     context = "\n\n".join(
@@ -147,6 +151,9 @@ Evidence Score:
 Evidence Reason:
 {state["evidence_reason"]}
 
+Answer Attempt:
+{answer_attempts}
+
 Context:
 {context}
 
@@ -162,9 +169,9 @@ Answer clearly and concisely.
     answer = llm_service.generate(prompt)
 
     return {
-        "answer": answer
+        "answer": answer,
+        "answer_attempts": answer_attempts,
     }
-
 
 def evaluate_answer(state: AgentState):
 
@@ -184,6 +191,9 @@ def select_answer_path(state: AgentState):
 
     if state["answer_supported"]:
         return "finish"
+
+    if state["answer_attempts"] < state["max_answer_attempts"]:
+        return "retry"
 
     return "reject"
 
@@ -274,6 +284,7 @@ class AgentService:
             select_answer_path,
             {
                 "finish": END,
+                "retry": "generate_answer",
                 "reject": END,
             },
         )
@@ -300,6 +311,8 @@ class AgentService:
             "answer_supported": False,
             "answer_score": 0.0,
             "answer_evaluation_reason": "",
+            "answer_attempts": 0,
+            "max_answer_attempts": 2,
             "execution_time_ms": 0.0,
         }
 
