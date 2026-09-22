@@ -1,14 +1,17 @@
+import os
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
 
 class VectorService:
-
     COLLECTION_NAME = "engineering_docs"
 
     def __init__(self):
+        qdrant_host = os.getenv("QDRANT_HOST", "localhost")
+
         self.client = QdrantClient(
-            host="localhost",
+            host=qdrant_host,
             port=6333,
         )
 
